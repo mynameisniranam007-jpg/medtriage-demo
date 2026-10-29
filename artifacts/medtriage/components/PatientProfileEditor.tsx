@@ -17,6 +17,7 @@ import {
   calculateBmi,
   emptyPatientProfile,
   formatNationalId,
+  formatPhone,
   PatientProfile,
   PROFILE_STORAGE_KEY,
 } from '@/constants/profile';
@@ -188,7 +189,7 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
       <SectionTitle title="ผู้ติดต่อฉุกเฉินและสิทธิรักษา" />
       <LabeledField label="ชื่อผู้ติดต่อฉุกเฉิน" value={profile.emergencyName} onChangeText={(value) => update('emergencyName', value)} placeholder="ชื่อ-นามสกุล" />
       <LabeledField label="ความสัมพันธ์" value={profile.emergencyRelation} onChangeText={(value) => update('emergencyRelation', value)} placeholder="เช่น บิดา มารดา คู่สมรส" />
-      <LabeledField label="เบอร์ผู้ติดต่อฉุกเฉิน" value={profile.emergencyPhone} onChangeText={(value) => update('emergencyPhone', value)} placeholder="08x-xxx-xxxx" keyboardType="phone-pad" />
+      <LabeledField label="เบอร์ผู้ติดต่อฉุกเฉิน" value={formatPhone(profile.emergencyPhone)} onChangeText={(value) => update('emergencyPhone', value.replace(/\D/g, '').slice(0, 10))} placeholder="08x-xxx-xxxx" keyboardType="phone-pad" maxLength={12} />
       <ChoiceGroup
         label="สิทธิการรักษา"
         options={['บัตรทอง', 'ประกันสังคม', 'ข้าราชการ', 'ประกันเอกชน', 'จ่ายเอง']}
@@ -256,13 +257,6 @@ function LabeledField({
       />
     </View>
   );
-}
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g,'').slice(0,10);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `${digits.slice(0,3)}-${digits.slice(3)}`;
-  return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
 }
 
 function ChoiceGroup({

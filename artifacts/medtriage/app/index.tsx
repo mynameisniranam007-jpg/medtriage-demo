@@ -1,13 +1,27 @@
 import React from 'react';
+import { useState } from 'react';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Screen, PrimaryButton, SecondaryButton } from '@/components/UI';
 import { useColors } from '@/hooks/useColors';
+import { demoGuestProfile, PROFILE_STORAGE_KEY } from '@/constants/profile';
 
 export default function WelcomeScreen() {
   const colors = useColors();
+  const [startingGuest, setStartingGuest] = useState(false);
+  const startGuestDemo = async () => {
+    setStartingGuest(true);
+    try {
+      await AsyncStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(demoGuestProfile));
+      router.replace('/(tabs)');
+    } catch {
+      Alert.alert('เปิดโหมดทดลองไม่ได้', 'โปรดลองอีกครั้ง');
+      setStartingGuest(false);
+    }
+  };
   return (
     <Screen scroll={false} contentStyle={styles.page}>
       <View style={styles.brandRow}>
@@ -27,6 +41,7 @@ export default function WelcomeScreen() {
       </View>
       <PrimaryButton title="เข้าสู่ระบบ" icon="log-in" onPress={() => router.push('/login')} testID="open-login" />
       <SecondaryButton title="สมัครสมาชิก" icon="user-plus" onPress={() => router.push('/register')} testID="open-register" />
+      <SecondaryButton title={startingGuest ? 'กำลังเตรียมข้อมูลเดโม…' : 'ทดลองแบบไม่ระบุตัวตน'} icon="user" onPress={() => void startGuestDemo()} testID="open-anonymous-demo" />
       <View style={[styles.notice, { backgroundColor: colors.secondary }]}>
         <Feather name="shield" size={16} color={colors.secondaryForeground} />
         <Text style={[styles.noticeText, { color: colors.secondaryForeground }]}>ต้นแบบนี้ยังไม่เชื่อมระบบหมอพร้อมหรือยืนยันตัวตนจริง โปรดใช้ข้อมูลสมมติ</Text>

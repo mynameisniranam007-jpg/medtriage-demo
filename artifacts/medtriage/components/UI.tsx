@@ -1,6 +1,7 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Platform,
   Pressable,
   ScrollView,
@@ -16,6 +17,7 @@ import { useColors } from '@/hooks/useColors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function Screen({
   children,
@@ -136,13 +138,17 @@ export function PrimaryButton({
   testID?: string;
 }) {
   const colors = useColors();
+  const scale = useRef(new Animated.Value(1)).current;
+  const animateScale = (toValue: number) => Animated.spring(scale, { toValue, useNativeDriver: true, speed: 32, bounciness: 7 }).start();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       testID={testID}
       disabled={disabled || loading}
       onPress={onPress}
+      onPressIn={() => animateScale(0.975)}
+      onPressOut={() => animateScale(1)}
       style={({ pressed }) => [
         styles.primaryButton,
         {
@@ -150,6 +156,7 @@ export function PrimaryButton({
           borderRadius: colors.radius,
           opacity: pressed ? 0.86 : 1,
         },
+        { transform: [{ scale }] },
         style,
       ]}
     >
@@ -174,7 +181,7 @@ export function PrimaryButton({
           </Text>
         </>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -192,11 +199,15 @@ export function SecondaryButton({
   testID?: string;
 }) {
   const colors = useColors();
+  const scale = useRef(new Animated.Value(1)).current;
+  const animateScale = (toValue: number) => Animated.spring(scale, { toValue, useNativeDriver: true, speed: 32, bounciness: 7 }).start();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       testID={testID}
       onPress={onPress}
+      onPressIn={() => animateScale(0.975)}
+      onPressOut={() => animateScale(1)}
       style={({ pressed }) => [
         styles.secondaryButton,
         {
@@ -205,6 +216,7 @@ export function SecondaryButton({
           borderRadius: colors.radius,
           opacity: pressed ? 0.8 : 1,
         },
+        { transform: [{ scale }] },
         style,
       ]}
     >
@@ -212,7 +224,7 @@ export function SecondaryButton({
       <Text style={[styles.secondaryButtonText, { color: colors.secondaryForeground }]}>
         {title}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -228,16 +240,20 @@ export function IconButton({
   color?: string;
 }) {
   const colors = useColors();
+  const scale = useRef(new Animated.Value(1)).current;
+  const animateScale = (toValue: number) => Animated.spring(scale, { toValue, useNativeDriver: true, speed: 32, bounciness: 7 }).start();
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      onPressIn={() => animateScale(0.9)}
+      onPressOut={() => animateScale(1)}
       hitSlop={8}
-      style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.65 : 1 }]}
+      style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.75 : 1 }, { transform: [{ scale }] }]}
     >
       <Feather name={icon} size={21} color={color ?? colors.foreground} />
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

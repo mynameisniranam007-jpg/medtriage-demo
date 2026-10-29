@@ -126,7 +126,7 @@ export default function ProfileScreen() {
       <BodyText style={styles.footerNote}>
         หากต้องการบริการสุขภาพจริง โปรดติดต่อสถานพยาบาลโดยตรง
       </BodyText>
-      <PrimaryButton title="ออกจากระบบ" icon="log-out" onPress={() => Alert.alert('ออกจากระบบ?', 'ระบบจะลบข้อมูลส่วนตัวและนัดหมายตัวอย่างที่บันทึกไว้ในอุปกรณ์นี้', [
+      <PrimaryButton title="ออกจากระบบ" icon="log-out" onPress={() => Alert.alert('ยืนยันออกจากระบบ', 'เนื่องจากเป็นแอปทดลอง ระบบจะลบข้อมูลส่วนตัวและข้อมูลตัวอย่างทั้งหมดในอุปกรณ์นี้ แล้วกลับไปหน้าแรก', [
         { text: 'ยกเลิก', style: 'cancel' },
         { text: 'ออกจากระบบและลบข้อมูล', style: 'destructive', onPress: () => { void logout().then(() => router.replace('/')).catch(() => Alert.alert('ลบข้อมูลไม่สำเร็จ','กรุณาลองออกจากระบบอีกครั้ง')); } },
       ])} testID="logout-button" />

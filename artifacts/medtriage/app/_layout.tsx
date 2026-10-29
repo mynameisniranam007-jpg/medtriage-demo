@@ -27,7 +27,7 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <Stack screenOptions={{ headerShown: false, animation: 'ios_from_right' }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="register" />
         <Stack.Screen name="recommended-hospitals" />

@@ -48,6 +48,30 @@ export const emptyPatientProfile: PatientProfile = {
   coverage: '',
 };
 
+export const demoGuestProfile: PatientProfile = {
+  ...emptyPatientProfile,
+  fullName: 'นายสมชาย ใจดี (ข้อมูลจำลอง)',
+  title: 'นาย',
+  firstName: 'สมชาย',
+  lastName: 'ใจดี',
+  birthDate: '15/06/2535',
+  gender: 'ชาย',
+  phone: '080-000-0000',
+  address: 'ข้อมูลที่อยู่สมมติ · กรุงเทพฯ',
+  bloodGroup: 'O',
+  rhFactor: 'ไม่ทราบ',
+  weightKg: '68',
+  heightCm: '170',
+  conditions: 'ไม่มี (ข้อมูลจำลอง)',
+  drugAllergies: 'ไม่มี (ข้อมูลจำลอง)',
+  foodAllergies: 'ไม่มี (ข้อมูลจำลอง)',
+  medications: 'ไม่มี (ข้อมูลจำลอง)',
+  emergencyName: 'นางสมหญิง ใจดี (ข้อมูลจำลอง)',
+  emergencyRelation: 'ญาติ (ข้อมูลจำลอง)',
+  emergencyPhone: '081-000-0000',
+  coverage: 'บัตรทอง (ข้อมูลจำลอง)',
+};
+
 export function formatNationalId(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 13);
   const groups = [
@@ -58,6 +82,13 @@ export function formatNationalId(value: string) {
     digits.slice(12, 13),
   ];
   return groups.filter(Boolean).join('-');
+}
+
+export function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
 export function maskNationalId(value: string) {

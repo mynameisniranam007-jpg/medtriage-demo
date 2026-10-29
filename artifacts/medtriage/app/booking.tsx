@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import {
   Alert,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -14,7 +15,13 @@ import { hospitalById } from '@/constants/data';
 import { useColors } from '@/hooks/useColors';
 import { useMedtriage } from '@/context/MedtriageContext';
 
-const timeSlots = ['09:00–09:30', '09:30–10:00', '10:00–10:30', '13:00–13:30', '14:00–14:30'];
+const timeSlots = Array.from({ length: 29 }, (_, index) => {
+  const hour = 8 + Math.floor(index / 2);
+  return `${String(hour).padStart(2, '0')}:${index % 2 ? '30' : '00'}`;
+});
+const dayHasSlots = (dayIndex: number, doctorIndex: number) => (dayIndex * 7 + doctorIndex * 5 + 2) % 13 !== 0;
+const slotHasCapacity = (dayIndex: number, doctorIndex: number, slotIndex: number) =>
+  dayHasSlots(dayIndex, doctorIndex) && (dayIndex * 3 + doctorIndex * 5 + slotIndex * 7 + 1) % 6 !== 0;
 const sampleDoctors = [
   { name: 'นพ. ธนกฤต วัฒนาพงศ์', specialty: 'เวชศาสตร์ครอบครัว', gender: 'ชาย' },
   { name: 'นพ. ปกรณ์ ศิริกุล', specialty: 'อายุรศาสตร์', gender: 'ชาย' },
@@ -29,7 +36,7 @@ export default function BookingScreen() {
   const hospital = hospitalById(params.hospitalId);
   const kind = params.mode === 'checkin' ? 'checkin' : 'advance';
   const { setSelectedHospital, saveAppointment } = useMedtriage();
-  const days = useMemo(() => Array.from({ length: 5 }, (_, index) => {
+  const days = useMemo(() => Array.from({ length: 14 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
     return date;
@@ -95,12 +102,13 @@ export default function BookingScreen() {
         </Text>
       </View>
 
-      <SectionTitle title="เลือกแพทย์" detail="รายชื่อแพทย์ตัวอย่าง ชาย 3 คน หญิง 2 คน" />
+      <SectionTitle title="เลือกแพทย์" detail="รายชื่อแพทย์ตัวอย่าง ชาย 3 คน หญิง 2 คน · คิวจำลองแยกตามแพทย์" />
       <View style={styles.doctorList}>{sampleDoctors.map((doctor,index)=>{
         const selected=selectedDoctor.name===doctor.name;
-        return <Pressable key={doctor.name} accessibilityRole="button" accessibilityState={{selected}} onPress={()=>setSelectedDoctor(doctor)} style={[styles.doctorCard,{backgroundColor:selected?colors.secondary:colors.card,borderColor:selected?colors.primary:colors.border}]}>
+        return <Pressable key={doctor.name} accessibilityRole="button" accessibilityState={{selected}} onPress={()=>{setSelectedDoctor(doctor);const nextDay=dayHasSlots(selectedDay,index)?selectedDay:days.findIndex((_,dayIndex)=>dayHasSlots(dayIndex,index));setSelectedDay(Math.max(0,nextDay));const first=timeSlots.findIndex((_,slotIndex)=>slotHasCapacity(Math.max(0,nextDay),index,slotIndex));setSelectedTime(first<0?null:timeSlots[first]);}} style={[styles.doctorCard,{backgroundColor:selected?colors.secondary:colors.card,borderColor:selected?colors.primary:colors.border}]}>
           <View style={[styles.doctorAvatar,{backgroundColor:index<3?'#E6F0FA':'#FBE9F0'}]}><Feather name="user" size={18} color={index<3?'#28628A':'#A14365'} /></View>
           <View style={{flex:1,gap:3}}><Text style={[styles.doctorName,{color:colors.foreground}]}>{doctor.name}</Text><Text style={[styles.doctorSub,{color:colors.mutedForeground}]}>{doctor.specialty} · {doctor.gender} · ข้อมูลตัวอย่าง</Text></View>
+          <View style={[styles.doctorStatus,{backgroundColor:index%2===0?'#E2F5EC':'#FFF0DC'}]}><Text style={{fontSize:9,fontWeight:'800',color:index%2===0?'#247451':'#93620C'}}>{index%2===0?'มีคิว':'บางช่วงเต็ม'}</Text></View>
           {selected?<Feather name="check-circle" size={19} color={colors.primary}/>:null}
         </Pressable>;
       })}</View>
@@ -134,24 +142,27 @@ export default function BookingScreen() {
       <View style={styles.section}>
         <SectionTitle
           title="เลือกวันที่"
-          detail={kind === 'checkin' ? 'เลือกช่วงเวลาเช็คอินตัวอย่าง' : 'วันที่ว่างใน 5 วันข้างหน้า'}
+          detail={kind === 'checkin' ? 'เลือกช่วงเวลาเช็คอินตัวอย่าง' : 'เลือกได้ 14 วันข้างหน้า · สถานะคิวจำลองแยกตามแพทย์'}
         />
-        <View style={styles.dayGrid}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayGrid}>
           {days.map((day, index) => {
             const selected = selectedDay === index;
+            const doctorIndex = sampleDoctors.findIndex((doctor) => doctor.name === selectedDoctor.name);
+            const hasSlots = dayHasSlots(index, doctorIndex);
             return (
               <Pressable
                 key={day.toISOString()}
+                disabled={!hasSlots}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, disabled: !hasSlots }}
                 testID={`booking-day-${index}`}
-                onPress={() => setSelectedDay(index)}
+                onPress={() => { setSelectedDay(index); const first=timeSlots.findIndex((_,slotIndex)=>slotHasCapacity(index,doctorIndex,slotIndex)); setSelectedTime(first<0?null:timeSlots[first]); }}
                 style={({ pressed }) => [
                   styles.dayButton,
                   {
                     backgroundColor: selected ? colors.primary : colors.card,
                     borderColor: selected ? colors.primary : colors.border,
-                    opacity: pressed ? 0.78 : 1,
+                    opacity: !hasSlots ? 0.55 : pressed ? 0.78 : 1,
                   },
                 ]}
               >
@@ -164,21 +175,23 @@ export default function BookingScreen() {
                 <Text style={[styles.dayMonth, { color: selected ? '#D5E6ED' : colors.mutedForeground }]}>
                   {new Intl.DateTimeFormat('th-TH', { month: 'short' }).format(day)}
                 </Text>
+                {!hasSlots ? <View style={styles.fullBadge}><View style={styles.fullDot}/><Text style={styles.fullText}>เต็ม</Text></View> : null}
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
 
       <View style={styles.section}>
         <SectionTitle
           title="เลือกช่วงเวลา"
-          detail="ทุกช่วงเวลาเป็นคิวตัวอย่าง"
+          detail="เลือกเวลาได้ตั้งแต่ 08:00 ถึง 22:00 · คิวเต็มแสดงเป็นสีแดง"
         />
         <View style={styles.slotGrid}>
           {timeSlots.map((slot, index) => {
             const selected = selectedTime === slot;
-            const available = index !== 2;
+            const doctorIndex = sampleDoctors.findIndex((doctor) => doctor.name === selectedDoctor.name);
+            const available = slotHasCapacity(selectedDay, doctorIndex, index);
             return (
               <Pressable
                 key={slot}
@@ -201,7 +214,7 @@ export default function BookingScreen() {
               >
                 <Text style={[styles.slotTime, { color: colors.foreground }]}>{slot}</Text>
                 <View style={styles.slotStatus}>
-                  <View style={[styles.availableDot, { backgroundColor: available ? '#36A27D' : colors.mutedForeground }]} />
+                  <View style={[styles.availableDot, { backgroundColor: available ? '#36A27D' : '#D94B45' }]} />
                   <Text style={[styles.slotStatusText, { color: colors.mutedForeground }]}>
                     {available ? 'มีคิวว่าง' : 'เต็ม'}
                   </Text>
@@ -261,8 +274,12 @@ const styles = StyleSheet.create({
   doctorAvatar:{width:40,height:40,borderRadius:15,alignItems:'center',justifyContent:'center'},
   doctorName:{fontSize:12,fontWeight:'800'},
   doctorSub:{fontSize:10,lineHeight:15},
+  doctorStatus:{paddingHorizontal:7,paddingVertical:5,borderRadius:9},
   dayGrid: { flexDirection: 'row', gap: 7 },
-  dayButton: { flex: 1, minHeight: 84, borderRadius: 15, borderWidth: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  dayButton: { width: 66, minHeight: 88, borderRadius: 15, borderWidth: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  fullBadge:{flexDirection:'row',alignItems:'center',gap:3,marginTop:2},
+  fullDot:{width:6,height:6,borderRadius:3,backgroundColor:'#D94B45'},
+  fullText:{fontSize:8,fontWeight:'800',color:'#B53D39'},
   dayName: { fontSize: 10, fontWeight: '600' },
   dayNumber: { fontSize: 19, fontWeight: '800' },
   dayMonth: { fontSize: 10 },
