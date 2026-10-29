@@ -25,7 +25,7 @@ export const hospitals: Hospital[] = [
     specialty: 'โรงพยาบาลมหาวิทยาลัย ดูแลรักษาโรคทั่วไปและเฉพาะทาง', phone: '02-926-9999', department: 'อายุรกรรมทั่วไป',
     doctor: 'ทีมแพทย์ตัวอย่าง', cost: 'ประมาณ 200–800 บาท', costNote: demoCost,
     latitude: 14.07346, longitude: 100.61561, area: 'คลองหลวง · ปทุมธานี',
-    photoUrl: 'https://www.hospital.tu.ac.th/finance/upload/slide/2022090114512490.jpg', photoCredit: 'ภาพจากเว็บไซต์โรงพยาบาลธรรมศาสตร์', photoPage: 'https://hospital.tu.ac.th/th',
+    photoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Thammasat_University_Hospital.jpg', photoCredit: 'Sry85 · CC BY-SA 4.0 · Wikimedia Commons', photoPage: 'https://commons.wikimedia.org/wiki/File:Thammasat_University_Hospital.jpg',
   },
   {
     id: 'phatara', name: 'โรงพยาบาลภัทร-ธนบุรี', kind: 'โรงพยาบาลเอกชน', category: 'general',

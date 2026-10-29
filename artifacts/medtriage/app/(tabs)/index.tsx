@@ -48,7 +48,7 @@ export default function HomeScreen() {
       .then((value) => {
         if (!active || !value) return;
         const profile = JSON.parse(value) as Partial<PatientProfile>;
-        if (profile.fullName?.trim()) setPatientName(profile.fullName.trim());
+        if (profile.fullName?.trim()) setPatientName(profile.fullName.trim().split(/\s+/)[0].slice(0, 20));
       })
       .catch(() => {
         if (active) setPatientName('คุณ');
@@ -81,7 +81,7 @@ export default function HomeScreen() {
           <View style={[styles.brandIcon, { backgroundColor: colors.primary }]}>
             <Feather name="plus" color={colors.primaryForeground} size={21} />
           </View>
-          <View>
+          <View style={styles.brandCopy}>
             <Text style={[styles.brandName, { color: colors.foreground }]}>
               medtriage
             </Text>
@@ -137,7 +137,7 @@ export default function HomeScreen() {
       <View style={styles.greetingRow}>
         <View style={styles.greetingCopy}>
           <Eyebrow>{weekday} · พร้อมดูแลคุณ</Eyebrow>
-          <Text style={[styles.greeting, { color: colors.foreground }]}>
+          <Text numberOfLines={2} adjustsFontSizeToFit style={[styles.greeting, { color: colors.foreground }]}>
             สวัสดี, {patientName}
           </Text>
         </View>
@@ -312,13 +312,14 @@ const styles = StyleSheet.create({
   notificationBadge: { position: 'absolute', top: 1, right: 0, minWidth: 17, height: 17, paddingHorizontal: 4, borderRadius: 9, backgroundColor: '#D94B45', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#FFFFFF' },
   notificationBadgeText: { color: '#FFFFFF', fontSize: 9, fontWeight: '800' },
   profileButton: { width: 36, height: 36, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
+  brandCopy: { flexShrink: 1, minWidth: 0 },
   brandIcon: { width: 38, height: 38, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   brandName: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3 },
   brandSub: { fontSize: 10, marginTop: 1 },
-  greetingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  greetingCopy: { gap: 6 },
-  greeting: { fontSize: 24, fontWeight: '800', lineHeight: 32 },
+  greetingRow: { flexDirection: 'row', alignItems: 'center', minWidth: 0 },
+  greetingCopy: { gap: 6, flex: 1, minWidth: 0 },
+  greeting: { fontSize: 24, fontWeight: '800', lineHeight: 32, flexShrink: 1 },
   toast: { minHeight: 44, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 8 },
   toastText: { flex: 1, fontSize: 11, lineHeight: 16, fontWeight: '700' },
   newsPreviewSection: { gap: 11 },
@@ -326,8 +327,8 @@ const styles = StyleSheet.create({
   newsPreviewCard: { minHeight: 82, borderRadius: 17, borderWidth: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8 },
   newsPreviewImage: { width: 67, height: 64, borderRadius: 12, backgroundColor: '#D9E8ED' },
   newsPreviewCopy: { flex: 1, gap: 5 },
-  newsPreviewTitle: { fontSize: 12, lineHeight: 17, fontWeight: '800' },
-  newsPreviewMeta: { fontSize: 9, lineHeight: 13 },
+  newsPreviewTitle: { fontSize: 13, lineHeight: 19, fontWeight: '800' },
+  newsPreviewMeta: { fontSize: 10, lineHeight: 15 },
   appointmentSection: { gap: 11 },
   actionGrid: { flexDirection: 'row', gap: 12 },
   actionCard: { flex: 1, minHeight: 148, borderRadius: 21, padding: 15, justifyContent: 'space-between' },

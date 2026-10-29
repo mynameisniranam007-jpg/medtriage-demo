@@ -30,8 +30,9 @@ const sampleDoctors = [
 
 export default function BookingScreen() {
   const colors = useColors();
-  const params = useLocalSearchParams<{ hospitalId?: string; mode?: string }>();
+  const params = useLocalSearchParams<{ hospitalId?: string; mode?: string; department?: string }>();
   const hospital = hospitalById(params.hospitalId);
+  const selectedDepartment = typeof params.department === 'string' ? params.department : hospital.department;
   const kind = params.mode === 'checkin' ? 'checkin' : 'advance';
   const { setSelectedHospital, saveAppointment } = useMedtriage();
   const days = useMemo(() => Array.from({ length: 14 }, (_, index) => {
@@ -61,7 +62,7 @@ export default function BookingScreen() {
       reference: `DEMO-${Date.now().toString().slice(-6)}`,
       hospitalId: hospital.id,
       hospitalName: hospital.name,
-      department: hospital.department,
+      department: selectedDepartment,
       doctor: `${selectedDoctor.name} · ${selectedDoctor.specialty}`,
       dateISO: days[selectedDay].toISOString(),
       dateLabel: formatDate(days[selectedDay]),
@@ -127,7 +128,7 @@ export default function BookingScreen() {
         <View style={[styles.detailRow, { borderTopColor: colors.border }]}>
           <Feather name="activity" size={15} color={colors.secondaryForeground} />
           <Text style={[styles.detailText, { color: colors.foreground }]}>
-            {hospital.department}
+            {selectedDepartment}
           </Text>
         </View>
         <View style={styles.detailRow}>
