@@ -13,7 +13,15 @@ export default function ProfileScreen() {
   const { appointment, appointmentLoading, logout } = useMedtriage();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const performLogout = async () => {
-    try { await logout(); router.replace('/'); }
+    try {
+      await logout();
+      if (Platform.OS === 'web') {
+        const projectBase = window.location.pathname.startsWith('/medtriage-demo') ? '/medtriage-demo/' : '/';
+        window.location.replace(projectBase);
+      } else {
+        router.replace('/');
+      }
+    }
     catch { if (Platform.OS === 'web') window.alert('ลบข้อมูลไม่สำเร็จ กรุณาลองออกจากระบบอีกครั้ง'); else Alert.alert('ลบข้อมูลไม่สำเร็จ','กรุณาลองออกจากระบบอีกครั้ง'); }
   };
   const requestLogout = () => {
