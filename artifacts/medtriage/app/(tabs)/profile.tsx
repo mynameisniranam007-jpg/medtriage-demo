@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -6,21 +6,18 @@ import { BodyText, Eyebrow, Pill, PrimaryButton, Screen, SectionTitle, SurfaceCa
 import PatientProfileSection from '@/components/PatientProfileSection';
 import { useColors } from '@/hooks/useColors';
 import { useMedtriage } from '@/context/MedtriageContext';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 
 export default function ProfileScreen() {
   const colors = useColors();
   const { appointment, appointmentLoading, logout } = useMedtriage();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const performLogout = async () => {
     try { await logout(); router.replace('/'); }
     catch { if (Platform.OS === 'web') window.alert('ลบข้อมูลไม่สำเร็จ กรุณาลองออกจากระบบอีกครั้ง'); else Alert.alert('ลบข้อมูลไม่สำเร็จ','กรุณาลองออกจากระบบอีกครั้ง'); }
   };
   const requestLogout = () => {
-    const message = 'เนื่องจากเป็นแอปทดลอง ระบบจะลบข้อมูลส่วนตัวและข้อมูลตัวอย่างทั้งหมดในอุปกรณ์นี้ แล้วกลับไปหน้าแรก';
-    if (Platform.OS === 'web') { if (window.confirm(`ยืนยันออกจากระบบ\n\n${message}`)) void performLogout(); return; }
-    Alert.alert('ยืนยันออกจากระบบ', message, [
-      { text: 'ยกเลิก', style: 'cancel' },
-      { text: 'ออกจากระบบและลบข้อมูล', style: 'destructive', onPress: () => { void performLogout(); } },
-    ]);
+    setShowLogoutConfirm(true);
   };
 
   return (
@@ -139,6 +136,15 @@ export default function ProfileScreen() {
         หากต้องการบริการสุขภาพจริง โปรดติดต่อสถานพยาบาลโดยตรง
       </BodyText>
       <PrimaryButton title="ออกจากระบบ" icon="log-out" onPress={requestLogout} testID="logout-button" />
+      <ConfirmationDialog
+        visible={showLogoutConfirm}
+        title="ออกจากระบบและลบข้อมูล?"
+        message="แอปทดลองนี้จะลบโปรไฟล์ ประวัติอาการ และนัดหมายตัวอย่างออกจากอุปกรณ์ แล้วกลับไปหน้าแรกเพื่อเลือกเข้าสู่ระบบ สมัครสมาชิก หรือทดลองแบบไม่ระบุตัวตน"
+        confirmLabel="ลบข้อมูลและออก"
+        icon="log-out"
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => { setShowLogoutConfirm(false); void performLogout(); }}
+      />
     </Screen>
   );
 }

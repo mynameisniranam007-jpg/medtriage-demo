@@ -7,31 +7,24 @@ import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 import { BodyText, Eyebrow, IconButton, Pill, PrimaryButton, Screen, SectionTitle, SurfaceCard } from '@/components/UI';
 import { useColors } from '@/hooks/useColors';
 import { useMedtriage } from '@/context/MedtriageContext';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 
 export default function PassScreen() {
   const colors = useColors();
   const { appointment, appointmentLoading, updateAppointmentRating, cancelAppointment } = useMedtriage();
   const [rating, setRating] = useState(appointment?.rating ?? 0);
   const [saving, setSaving] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const cancelNow = async () => {
     try {
       await cancelAppointment();
-      if (Platform.OS === 'web') window.alert('ยกเลิกนัดหมายตัวอย่างเรียบร้อย');
-      else Alert.alert('ยกเลิกแล้ว','ยกเลิกนัดหมายตัวอย่างเรียบร้อย');
       router.replace('/(tabs)');
     } catch {
       if (Platform.OS === 'web') window.alert('ใช้สิทธิยกเลิกครบ 2 ครั้งต่อวันแล้ว');
       else Alert.alert('ยกเลิกไม่ได้','ใช้สิทธิยกเลิกครบ 2 ครั้งต่อวันแล้ว');
     }
   };
-  const requestCancellation = () => {
-    const message = 'ยกเลิกนัดได้ไม่เกิน 2 ครั้งต่อวันตามกติกาตัวอย่าง หากไม่มาตามนัดจริง อาจมีเงื่อนไขตามนโยบายของสถานพยาบาล';
-    if (Platform.OS === 'web') { if (window.confirm(`ยืนยันการยกเลิกนัด?\n\n${message}`)) void cancelNow(); return; }
-    Alert.alert('ยืนยันการยกเลิกนัด?', message, [
-      { text: 'กลับไป', style: 'cancel' },
-      { text: 'ยืนยันยกเลิก', style: 'destructive', onPress: () => { void cancelNow(); } },
-    ]);
-  };
+  const requestCancellation = () => setShowCancelConfirm(true);
 
   const confirmRating = async () => {
     if (!rating) {
@@ -201,6 +194,15 @@ export default function PassScreen() {
           testID="confirm-service-rating"
         />
       </SurfaceCard>
+      <ConfirmationDialog
+        visible={showCancelConfirm}
+        title="ยืนยันยกเลิกนัดหมาย?"
+        message="นัดหมายตัวอย่างนี้จะถูกลบออกจากบัตรคิวทันที ใช้สิทธิยกเลิกได้ไม่เกิน 2 ครั้งต่อวัน หากไม่มาตามนัดจริงอาจมีเงื่อนไขตามนโยบายสถานพยาบาล"
+        confirmLabel="ยืนยันยกเลิก"
+        icon="calendar"
+        onCancel={() => setShowCancelConfirm(false)}
+        onConfirm={() => { setShowCancelConfirm(false); void cancelNow(); }}
+      />
     </Screen>
   );
 }

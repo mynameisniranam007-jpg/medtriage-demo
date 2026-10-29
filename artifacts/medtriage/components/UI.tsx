@@ -149,14 +149,13 @@ export function PrimaryButton({
       onPress={onPress}
       onPressIn={() => animateScale(0.975)}
       onPressOut={() => animateScale(1)}
-      style={({ pressed }) => [
+      style={[
         styles.primaryButton,
         {
           backgroundColor: disabled ? colors.muted : colors.primary,
           borderWidth: 1.5,
           borderColor: disabled ? colors.border : colors.primary,
           borderRadius: colors.radius,
-          opacity: pressed ? 0.86 : 1,
         },
         { transform: [{ scale }] },
         style,
@@ -210,14 +209,13 @@ export function SecondaryButton({
       onPress={onPress}
       onPressIn={() => animateScale(0.975)}
       onPressOut={() => animateScale(1)}
-      style={({ pressed }) => [
+      style={[
         styles.secondaryButton,
         {
           backgroundColor: colors.secondary,
           borderColor: colors.secondaryForeground,
           borderWidth: 1.5,
           borderRadius: colors.radius,
-          opacity: pressed ? 0.8 : 1,
         },
         { transform: [{ scale }] },
         style,

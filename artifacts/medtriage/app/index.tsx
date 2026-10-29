@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Screen, PrimaryButton, SecondaryButton } from '@/components/UI';
 import { useColors } from '@/hooks/useColors';
@@ -11,6 +11,8 @@ import { demoGuestProfile, PROFILE_STORAGE_KEY } from '@/constants/profile';
 
 export default function WelcomeScreen() {
   const colors = useColors();
+  const { height } = useWindowDimensions();
+  const compact = height < 760;
   const [startingGuest, setStartingGuest] = useState(false);
   const startGuestDemo = async () => {
     setStartingGuest(true);
@@ -23,17 +25,17 @@ export default function WelcomeScreen() {
     }
   };
   return (
-    <Screen scroll={false} contentStyle={styles.page}>
+    <Screen scroll={false} contentStyle={[styles.page, { gap: compact ? 9 : 14, justifyContent: 'flex-start', paddingTop: compact ? 8 : 16, paddingBottom: compact ? 8 : 16 }]}>
       <View style={styles.brandRow}>
         <View style={[styles.brandMark, { backgroundColor: colors.primary }]}><Feather name="plus" size={25} color={colors.primaryForeground} /></View>
         <Text style={[styles.brandName, { color: colors.foreground }]}>medtriage</Text>
         <Text style={[styles.demoTag, { color: colors.secondaryForeground }]}>ทดลอง</Text>
       </View>
-      <LinearGradient colors={[colors.primary, '#155373', '#187C7A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+      <LinearGradient colors={[colors.primary, '#155373', '#187C7A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.hero, { minHeight: compact ? 150 : 235, padding: compact ? 16 : 22, gap: compact ? 7 : 10 }]}>
         <View style={styles.heroIcon}><Feather name="heart" size={23} color="#FFFFFF" /></View>
         <Text style={styles.heroEyebrow}>สุขภาพดี เริ่มต้นที่เข้าใจ</Text>
-        <Text style={styles.heroTitle}>ดูแลสุขภาพ{ '\n' }ได้ง่ายขึ้นทุกวัน</Text>
-        <Text style={styles.heroDescription}>เริ่มจากประเมินอาการเบื้องต้น แล้วค้นหาบริการสุขภาพที่เหมาะกับคุณ</Text>
+        <Text style={[styles.heroTitle, compact && styles.heroTitleCompact]}>ดูแลสุขภาพ{ '\n' }ได้ง่ายขึ้นทุกวัน</Text>
+        <Text style={[styles.heroDescription, compact && styles.heroDescriptionCompact]}>เริ่มจากประเมินอาการเบื้องต้น แล้วค้นหาบริการสุขภาพที่เหมาะกับคุณ</Text>
       </LinearGradient>
       <View style={styles.copy}>
         <Text style={[styles.title, { color: colors.foreground }]}>ยินดีต้อนรับสู่ Medtriage</Text>
@@ -52,7 +54,7 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  page: { gap: 14, justifyContent: 'center' },
+  page: { gap: 14, justifyContent: 'flex-start' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   brandMark: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   brandName: { fontSize: 20, fontWeight: '800', flex: 1 },
@@ -62,6 +64,8 @@ const styles = StyleSheet.create({
   heroEyebrow: { color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '700' },
   heroTitle: { color: '#FFFFFF', fontSize: 31, lineHeight: 40, fontWeight: '800' },
   heroDescription: { color: 'rgba(255,255,255,0.82)', fontSize: 14, lineHeight: 22, maxWidth: 320 },
+  heroTitleCompact: { fontSize: 25, lineHeight: 31 },
+  heroDescriptionCompact: { fontSize: 12, lineHeight: 17 },
   copy: { gap: 5 },
   title: { fontSize: 22, fontWeight: '800' },
   subtitle: { fontSize: 14, lineHeight: 21 },
