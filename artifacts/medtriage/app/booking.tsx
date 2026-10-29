@@ -15,13 +15,11 @@ import { hospitalById } from '@/constants/data';
 import { useColors } from '@/hooks/useColors';
 import { useMedtriage } from '@/context/MedtriageContext';
 
-const timeSlots = Array.from({ length: 29 }, (_, index) => {
-  const hour = 8 + Math.floor(index / 2);
-  return `${String(hour).padStart(2, '0')}:${index % 2 ? '30' : '00'}`;
-});
-const dayHasSlots = (dayIndex: number, doctorIndex: number) => (dayIndex * 7 + doctorIndex * 5 + 2) % 13 !== 0;
+const timeSlots = ['08:00–08:30','09:00–09:30','10:00–10:30','11:00–11:30','12:30–13:00','14:00–14:30','15:00–15:30','16:00–16:30','17:00–17:30','18:00–18:30','19:00–19:30','20:00–20:30','20:30–21:00'];
+const busyRateByDoctor = [3, 6, 8, 4, 9];
+const dayHasSlots = (dayIndex: number, doctorIndex: number) => (dayIndex * 7 + doctorIndex * 5 + 2) % 17 !== 0;
 const slotHasCapacity = (dayIndex: number, doctorIndex: number, slotIndex: number) =>
-  dayHasSlots(dayIndex, doctorIndex) && (dayIndex * 3 + doctorIndex * 5 + slotIndex * 7 + 1) % 6 !== 0;
+  dayHasSlots(dayIndex, doctorIndex) && (dayIndex * 11 + doctorIndex * 7 + slotIndex * 5 + 3) % busyRateByDoctor[doctorIndex] !== 0;
 const sampleDoctors = [
   { name: 'นพ. ธนกฤต วัฒนาพงศ์', specialty: 'เวชศาสตร์ครอบครัว', gender: 'ชาย' },
   { name: 'นพ. ปกรณ์ ศิริกุล', specialty: 'อายุรศาสตร์', gender: 'ชาย' },
@@ -105,10 +103,11 @@ export default function BookingScreen() {
       <SectionTitle title="เลือกแพทย์" detail="รายชื่อแพทย์ตัวอย่าง ชาย 3 คน หญิง 2 คน · คิวจำลองแยกตามแพทย์" />
       <View style={styles.doctorList}>{sampleDoctors.map((doctor,index)=>{
         const selected=selectedDoctor.name===doctor.name;
+        const fullCount=timeSlots.filter((_,slotIndex)=>!slotHasCapacity(selectedDay,index,slotIndex)).length;
         return <Pressable key={doctor.name} accessibilityRole="button" accessibilityState={{selected}} onPress={()=>{setSelectedDoctor(doctor);const nextDay=dayHasSlots(selectedDay,index)?selectedDay:days.findIndex((_,dayIndex)=>dayHasSlots(dayIndex,index));setSelectedDay(Math.max(0,nextDay));const first=timeSlots.findIndex((_,slotIndex)=>slotHasCapacity(Math.max(0,nextDay),index,slotIndex));setSelectedTime(first<0?null:timeSlots[first]);}} style={[styles.doctorCard,{backgroundColor:selected?colors.secondary:colors.card,borderColor:selected?colors.primary:colors.border}]}>
           <View style={[styles.doctorAvatar,{backgroundColor:index<3?'#E6F0FA':'#FBE9F0'}]}><Feather name="user" size={18} color={index<3?'#28628A':'#A14365'} /></View>
           <View style={{flex:1,gap:3}}><Text style={[styles.doctorName,{color:colors.foreground}]}>{doctor.name}</Text><Text style={[styles.doctorSub,{color:colors.mutedForeground}]}>{doctor.specialty} · {doctor.gender} · ข้อมูลตัวอย่าง</Text></View>
-          <View style={[styles.doctorStatus,{backgroundColor:index%2===0?'#E2F5EC':'#FFF0DC'}]}><Text style={{fontSize:9,fontWeight:'800',color:index%2===0?'#247451':'#93620C'}}>{index%2===0?'มีคิว':'บางช่วงเต็ม'}</Text></View>
+          <View style={[styles.doctorStatus,{backgroundColor:fullCount>=timeSlots.length?'#FCE8E7':fullCount>=5?'#FFF0DC':'#E2F5EC'}]}><Text style={{fontSize:9,fontWeight:'800',color:fullCount>=timeSlots.length?'#B53D39':fullCount>=5?'#93620C':'#247451'}}>{fullCount>=timeSlots.length?'คิวเต็ม':`เต็ม ${fullCount} ช่วง`}</Text></View>
           {selected?<Feather name="check-circle" size={19} color={colors.primary}/>:null}
         </Pressable>;
       })}</View>
@@ -185,7 +184,7 @@ export default function BookingScreen() {
       <View style={styles.section}>
         <SectionTitle
           title="เลือกช่วงเวลา"
-          detail="เลือกเวลาได้ตั้งแต่ 08:00 ถึง 22:00 · คิวเต็มแสดงเป็นสีแดง"
+          detail="มีช่วงนัดตั้งแต่ 08:00 ถึง 21:00 · คิวเต็มแสดงเป็นสีแดง · สถานะจำลองแยกตามแพทย์และวัน"
         />
         <View style={styles.slotGrid}>
           {timeSlots.map((slot, index) => {
@@ -206,16 +205,16 @@ export default function BookingScreen() {
                 style={({ pressed }) => [
                   styles.slotButton,
                   {
-                    backgroundColor: selected ? colors.accent : colors.card,
-                    borderColor: selected ? colors.accentForeground : colors.border,
-                    opacity: !available ? 0.45 : pressed ? 0.72 : 1,
+                    backgroundColor: !available ? '#FCE8E7' : selected ? colors.accent : colors.card,
+                    borderColor: !available ? '#D94B45' : selected ? colors.accentForeground : colors.border,
+                    opacity: pressed ? 0.82 : 1,
                   },
                 ]}
               >
-                <Text style={[styles.slotTime, { color: colors.foreground }]}>{slot}</Text>
+                <Text style={[styles.slotTime, { color: available ? colors.foreground : '#B53D39' }]}>{slot}</Text>
                 <View style={styles.slotStatus}>
                   <View style={[styles.availableDot, { backgroundColor: available ? '#36A27D' : '#D94B45' }]} />
-                  <Text style={[styles.slotStatusText, { color: colors.mutedForeground }]}>
+                  <Text style={[styles.slotStatusText, { color: available ? colors.mutedForeground : '#B53D39' }]}>
                     {available ? 'มีคิวว่าง' : 'เต็ม'}
                   </Text>
                 </View>
@@ -236,7 +235,7 @@ export default function BookingScreen() {
           </Text>
         </View>
         <BodyText style={styles.estimateNote}>
-          ราคาและคิวจริงต้องตรวจสอบกับโรงพยาบาลโดยตรง
+          ตัวเลขค่าใช้จ่ายและสถานะคิวเป็นข้อมูลสมมติสำหรับการนำเสนอ
         </BodyText>
       </SurfaceCard>
 

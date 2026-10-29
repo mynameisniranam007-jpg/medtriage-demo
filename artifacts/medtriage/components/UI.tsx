@@ -153,6 +153,8 @@ export function PrimaryButton({
         styles.primaryButton,
         {
           backgroundColor: disabled ? colors.muted : colors.primary,
+          borderWidth: 1.5,
+          borderColor: disabled ? colors.border : colors.primary,
           borderRadius: colors.radius,
           opacity: pressed ? 0.86 : 1,
         },
@@ -212,7 +214,8 @@ export function SecondaryButton({
         styles.secondaryButton,
         {
           backgroundColor: colors.secondary,
-          borderColor: colors.border,
+          borderColor: colors.secondaryForeground,
+          borderWidth: 1.5,
           borderRadius: colors.radius,
           opacity: pressed ? 0.8 : 1,
         },
@@ -337,7 +340,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   primaryButton: {
-    minHeight: 52,
+    minHeight: 56,
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
@@ -346,13 +349,13 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: { fontSize: 15, fontWeight: '700', textAlign: 'center' },
   secondaryButton: {
-    minHeight: 46,
+    minHeight: 50,
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    borderWidth: 1,
+    borderWidth: 1.5,
   },
   secondaryButtonText: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
   iconButton: {

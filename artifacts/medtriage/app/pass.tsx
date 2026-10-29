@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import * as Haptics from 'expo-haptics';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BodyText, Eyebrow, IconButton, Pill, PrimaryButton, Screen, SectionTitle, SurfaceCard } from '@/components/UI';
 import { useColors } from '@/hooks/useColors';
 import { useMedtriage } from '@/context/MedtriageContext';
@@ -13,17 +13,25 @@ export default function PassScreen() {
   const { appointment, appointmentLoading, updateAppointmentRating, cancelAppointment } = useMedtriage();
   const [rating, setRating] = useState(appointment?.rating ?? 0);
   const [saving, setSaving] = useState(false);
-  const requestCancellation = () => Alert.alert(
-    'ยืนยันการยกเลิกนัด?',
-    'ยกเลิกได้ไม่เกิน 2 ครั้งต่อวันตามกติกาตัวอย่าง หากไม่มาตามนัด โรงพยาบาลจริงอาจมีเงื่อนไขหรือค่าใช้จ่ายตามนโยบาย โปรดตรวจสอบก่อนยืนยัน',
-    [
+  const cancelNow = async () => {
+    try {
+      await cancelAppointment();
+      if (Platform.OS === 'web') window.alert('ยกเลิกนัดหมายตัวอย่างเรียบร้อย');
+      else Alert.alert('ยกเลิกแล้ว','ยกเลิกนัดหมายตัวอย่างเรียบร้อย');
+      router.replace('/(tabs)');
+    } catch {
+      if (Platform.OS === 'web') window.alert('ใช้สิทธิยกเลิกครบ 2 ครั้งต่อวันแล้ว');
+      else Alert.alert('ยกเลิกไม่ได้','ใช้สิทธิยกเลิกครบ 2 ครั้งต่อวันแล้ว');
+    }
+  };
+  const requestCancellation = () => {
+    const message = 'ยกเลิกนัดได้ไม่เกิน 2 ครั้งต่อวันตามกติกาตัวอย่าง หากไม่มาตามนัดจริง อาจมีเงื่อนไขตามนโยบายของสถานพยาบาล';
+    if (Platform.OS === 'web') { if (window.confirm(`ยืนยันการยกเลิกนัด?\n\n${message}`)) void cancelNow(); return; }
+    Alert.alert('ยืนยันการยกเลิกนัด?', message, [
       { text: 'กลับไป', style: 'cancel' },
-      { text: 'ยืนยันยกเลิก', style: 'destructive', onPress: () => { void (async () => {
-        try { await cancelAppointment(); Alert.alert('ยกเลิกแล้ว','ยกเลิกนัดหมายตัวอย่างเรียบร้อย'); router.replace('/(tabs)'); }
-        catch { Alert.alert('ยกเลิกไม่ได้','ใช้สิทธิยกเลิกครบ 2 ครั้งต่อวันแล้ว'); }
-      })(); } },
-    ],
-  );
+      { text: 'ยืนยันยกเลิก', style: 'destructive', onPress: () => { void cancelNow(); } },
+    ]);
+  };
 
   const confirmRating = async () => {
     if (!rating) {

@@ -5,7 +5,6 @@ import {
   Modal,
   KeyboardTypeOptions,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -37,7 +36,8 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
   const [saving, setSaving] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
-  const [showYearPicker, setShowYearPicker] = useState(false);
+  const [calendarMode, setCalendarMode] = useState<'days' | 'months' | 'years'>('days');
+  const [yearPageStart, setYearPageStart] = useState(() => Math.floor((new Date().getFullYear() + 543) / 10) * 10 - 9);
   const age = calculateAge(profile.birthDate);
   const bmi = calculateBmi(profile.weightKg, profile.heightCm);
 
@@ -127,18 +127,18 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
       />
       <View style={styles.field}>
         <Text style={[styles.fieldLabel,{color:colors.foreground}]}>วันเกิด *</Text>
-        <Pressable onPress={() => { setCalendarMonth(new Date()); setCalendarOpen(true); }} style={[styles.input,{borderColor:colors.input,backgroundColor:colors.background,justifyContent:'center'}]}>
+        <Pressable onPress={() => { setCalendarMonth(new Date()); setCalendarMode('days'); setCalendarOpen(true); }} style={[styles.input,{borderColor:colors.input,backgroundColor:colors.background,justifyContent:'center'}]}>
           <Text style={{color:profile.birthDate ? colors.foreground : colors.mutedForeground}}>{profile.birthDate || 'เลือกวันเกิดจากปฏิทิน'}</Text>
         </Pressable>
       </View>
       <Modal visible={calendarOpen} transparent animationType="fade" onRequestClose={() => setCalendarOpen(false)}>
         <View style={styles.modalBackdrop}><View style={[styles.calendar,{backgroundColor:colors.card}]}>
           <View style={styles.calendarHead}>
-            <Pressable onPress={() => setCalendarMonth(m => new Date(m.getFullYear(),m.getMonth()-1,1))}><Feather name="chevron-left" size={22} color={colors.foreground}/></Pressable>
-            <Pressable onPress={() => setShowYearPicker(v=>!v)} accessibilityRole="button" accessibilityLabel="เลือกปีเกิด"><Text style={[styles.calendarTitle,{color:colors.foreground}]}>{new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric'}).format(calendarMonth)} ▾</Text></Pressable>
-            <Pressable onPress={() => setCalendarMonth(m => new Date(m.getFullYear(),m.getMonth()+1,1))}><Feather name="chevron-right" size={22} color={colors.foreground}/></Pressable>
+            {calendarMode === 'days' ? <Pressable accessibilityLabel="เดือนก่อน" onPress={() => setCalendarMonth(m => new Date(m.getFullYear(),m.getMonth()-1,1))}><Feather name="chevron-left" size={22} color={colors.foreground}/></Pressable> : calendarMode === 'years' ? <Pressable accessibilityLabel="สิบปีก่อน" onPress={() => setYearPageStart(y => Math.max(2400, y-10))}><Feather name="chevron-left" size={22} color={colors.foreground}/></Pressable> : <View style={{width:22}}/>}
+            {calendarMode === 'days' ? <Pressable onPress={() => setCalendarMode('months')} accessibilityRole="button" accessibilityLabel="เลือกเดือนและปี"><Text style={[styles.calendarTitle,{color:colors.foreground}]}>{new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric'}).format(calendarMonth)} ▾</Text></Pressable> : calendarMode === 'months' ? <Pressable onPress={() => { setYearPageStart(Math.floor((calendarMonth.getFullYear()+543)/10)*10-9); setCalendarMode('years'); }}><Text style={[styles.calendarTitle,{color:colors.foreground}]}>{calendarMonth.getFullYear()+543} ▾</Text></Pressable> : <Text style={[styles.calendarTitle,{color:colors.foreground}]}>{yearPageStart}–{Math.min(yearPageStart+9,new Date().getFullYear()+543)}</Text>}
+            {calendarMode === 'days' ? <Pressable accessibilityLabel="เดือนถัดไป" onPress={() => setCalendarMonth(m => new Date(m.getFullYear(),m.getMonth()+1,1))}><Feather name="chevron-right" size={22} color={colors.foreground}/></Pressable> : calendarMode === 'years' ? <Pressable accessibilityLabel="สิบปีถัดไป" onPress={() => setYearPageStart(y => Math.min(new Date().getFullYear()+543-9, y+10))}><Feather name="chevron-right" size={22} color={colors.foreground}/></Pressable> : <View style={{width:22}}/>}
           </View>
-          {showYearPicker ? <ScrollView style={styles.yearScroll} contentContainerStyle={styles.yearGrid}>{Array.from({length:new Date().getFullYear()+543-2400+1},(_,i)=>new Date().getFullYear()+543-i).map(year=><Pressable key={year} onPress={()=>{setCalendarMonth(m=>new Date(year-543,m.getMonth(),1));setShowYearPicker(false);}} style={[styles.yearChoice,{backgroundColor:calendarMonth.getFullYear()+543===year?colors.primary:colors.background}]}><Text style={{color:calendarMonth.getFullYear()+543===year?colors.primaryForeground:colors.foreground,fontWeight:'700'}}>{year}</Text></Pressable>)}</ScrollView> : <View style={styles.calendarGrid}>{['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=><Text key={d} style={[styles.weekday,{color:colors.mutedForeground}]}>{d}</Text>)}
+          {calendarMode === 'years' ? <View style={styles.calendarGrid}>{Array.from({length:10},(_,i)=>yearPageStart+i).filter(year=>year<=new Date().getFullYear()+543).map(year=><Pressable key={year} onPress={()=>{setCalendarMonth(m=>new Date(year-543,m.getMonth(),1));setCalendarMode('months');}} style={[styles.dayChoice,styles.yearChoice,{backgroundColor:calendarMonth.getFullYear()+543===year?colors.primary:colors.background}]}><Text style={{color:calendarMonth.getFullYear()+543===year?colors.primaryForeground:colors.foreground,fontWeight:'700'}}>{year}</Text></Pressable>)}</View> : calendarMode === 'months' ? <View style={styles.calendarGrid}>{Array.from({length:12},(_,month)=>month).map(month=><Pressable key={month} onPress={()=>{setCalendarMonth(m=>new Date(m.getFullYear(),month,1));setCalendarMode('days');}} style={[styles.dayChoice,styles.monthChoice,{backgroundColor:calendarMonth.getMonth()===month?colors.primary:colors.background}]}><Text style={{color:calendarMonth.getMonth()===month?colors.primaryForeground:colors.foreground,fontWeight:'700'}}>{new Intl.DateTimeFormat('th-TH',{month:'short'}).format(new Date(2020,month,1))}</Text></Pressable>)}</View> : <View style={styles.calendarGrid}>{['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=><Text key={d} style={[styles.weekday,{color:colors.mutedForeground}]}>{d}</Text>)}
             {Array.from({length:new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),1).getDay()},(_,i)=><View key={`empty-${i}`} style={styles.calendarDay}/>)}
             {Array.from({length:new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,0).getDate()},(_,i)=>{const day=i+1; return <Pressable key={day} style={[styles.calendarDay,styles.dayChoice,{backgroundColor:profile.birthDate===`${String(day).padStart(2,'0')}/${String(calendarMonth.getMonth()+1).padStart(2,'0')}/${calendarMonth.getFullYear()+543}`?colors.primary:'transparent'}]} onPress={()=>{update('birthDate',`${String(day).padStart(2,'0')}/${String(calendarMonth.getMonth()+1).padStart(2,'0')}/${calendarMonth.getFullYear()+543}`);setCalendarOpen(false);}}><Text style={{color:colors.foreground}}>{day}</Text></Pressable>})}
           </View>}
@@ -335,7 +335,6 @@ const styles = StyleSheet.create({
   weekday:{width:'14.285%',height:34,textAlign:'center',textAlignVertical:'center',fontSize:11,fontWeight:'700'},
   calendarDay:{width:'14.285%',height:39,alignItems:'center',justifyContent:'center'},
   dayChoice:{borderRadius:13},
-  yearScroll:{maxHeight:270},
-  yearGrid:{flexDirection:'row',flexWrap:'wrap',gap:7,justifyContent:'center'},
-  yearChoice:{width:'22%',height:38,borderRadius:11,alignItems:'center',justifyContent:'center'},
+  yearChoice:{width:'30%',height:48,borderRadius:12,alignItems:'center',justifyContent:'center',margin:'1.5%'},
+  monthChoice:{width:'30%',height:48,borderRadius:12,alignItems:'center',justifyContent:'center',margin:'1.5%'},
 });
