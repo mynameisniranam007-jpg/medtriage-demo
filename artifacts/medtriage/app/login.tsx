@@ -34,7 +34,7 @@ export default function LoginScreen() {
       <PrimaryButton title="เข้าสู่ระบบ" icon="log-in" onPress={() => void submit()} />
       <Text style={[styles.note,{color:colors.mutedForeground}]}>หน้าต้นแบบสำหรับทดลองเท่านั้น ไม่มีการส่งหรือยืนยันข้อมูลกับระบบจริง</Text>
     </SurfaceCard>
-    <Pressable onPress={() => router.push('/profile-setup')}><Text style={[styles.register,{color:colors.secondaryForeground}]}>ยังไม่มีบัญชี? สมัครสมาชิก</Text></Pressable>
+    <Pressable onPress={() => router.push('/register')}><Text style={[styles.register,{color:colors.secondaryForeground}]}>ยังไม่มีบัญชี? สมัครสมาชิก</Text></Pressable>
   </Screen>;
 }
 

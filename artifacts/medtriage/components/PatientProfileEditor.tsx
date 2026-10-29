@@ -5,6 +5,7 @@ import {
   Modal,
   KeyboardTypeOptions,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -35,7 +36,7 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
   const [saving, setSaving] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
-  const [cardPhotoSelected, setCardPhotoSelected] = useState(false);
+  const [showYearPicker, setShowYearPicker] = useState(false);
   const age = calculateAge(profile.birthDate);
   const bmi = calculateBmi(profile.weightKg, profile.heightCm);
 
@@ -124,14 +125,6 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
         maxLength={17}
       />
       <View style={styles.field}>
-        <Text style={[styles.fieldLabel, { color: colors.foreground }]}>ถ่ายภาพบัตรประชาชน (ตัวอย่าง)</Text>
-        <Pressable onPress={() => setCardPhotoSelected(v=>!v)} style={[styles.cardScanButton,{backgroundColor:colors.secondary}]}>
-          <Feather name={cardPhotoSelected ? 'check-circle' : 'camera'} size={17} color={colors.secondaryForeground} />
-          <Text style={{color:colors.secondaryForeground,fontSize:12,fontWeight:'700'}}>{cardPhotoSelected ? 'ซ่อนกรอบสแกนตัวอย่าง' : 'ดูตัวอย่างกรอบสแกนบัตร'}</Text>
-        </Pressable>
-        {cardPhotoSelected?<View style={[styles.cardScanPreview,{backgroundColor:colors.background,borderColor:colors.border}]}><Feather name="credit-card" size={25} color={colors.secondaryForeground}/><View style={{flex:1}}><Text style={[styles.scanTitle,{color:colors.foreground}]}>วางบัตรให้อยู่ในกรอบ</Text><Text style={[styles.helpText,{color:colors.mutedForeground}]}>หน้าจอตัวอย่างเท่านั้น · ยังไม่เปิดกล้องหรืออ่านข้อมูล</Text></View><Feather name="maximize" size={18} color={colors.mutedForeground}/></View>:null}
-      </View>
-      <View style={styles.field}>
         <Text style={[styles.fieldLabel,{color:colors.foreground}]}>วันเกิด *</Text>
         <Pressable onPress={() => { setCalendarMonth(new Date()); setCalendarOpen(true); }} style={[styles.input,{borderColor:colors.input,backgroundColor:colors.background,justifyContent:'center'}]}>
           <Text style={{color:profile.birthDate ? colors.foreground : colors.mutedForeground}}>{profile.birthDate || 'เลือกวันเกิดจากปฏิทิน'}</Text>
@@ -141,13 +134,13 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
         <View style={styles.modalBackdrop}><View style={[styles.calendar,{backgroundColor:colors.card}]}>
           <View style={styles.calendarHead}>
             <Pressable onPress={() => setCalendarMonth(m => new Date(m.getFullYear(),m.getMonth()-1,1))}><Feather name="chevron-left" size={22} color={colors.foreground}/></Pressable>
-            <Text style={[styles.calendarTitle,{color:colors.foreground}]}>{new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric'}).format(calendarMonth)}</Text>
+            <Pressable onPress={() => setShowYearPicker(v=>!v)} accessibilityRole="button" accessibilityLabel="เลือกปีเกิด"><Text style={[styles.calendarTitle,{color:colors.foreground}]}>{new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric'}).format(calendarMonth)} ▾</Text></Pressable>
             <Pressable onPress={() => setCalendarMonth(m => new Date(m.getFullYear(),m.getMonth()+1,1))}><Feather name="chevron-right" size={22} color={colors.foreground}/></Pressable>
           </View>
-          <View style={styles.calendarGrid}>{['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=><Text key={d} style={[styles.weekday,{color:colors.mutedForeground}]}>{d}</Text>)}
+          {showYearPicker ? <ScrollView style={styles.yearScroll} contentContainerStyle={styles.yearGrid}>{Array.from({length:new Date().getFullYear()+543-2400+1},(_,i)=>new Date().getFullYear()+543-i).map(year=><Pressable key={year} onPress={()=>{setCalendarMonth(m=>new Date(year-543,m.getMonth(),1));setShowYearPicker(false);}} style={[styles.yearChoice,{backgroundColor:calendarMonth.getFullYear()+543===year?colors.primary:colors.background}]}><Text style={{color:calendarMonth.getFullYear()+543===year?colors.primaryForeground:colors.foreground,fontWeight:'700'}}>{year}</Text></Pressable>)}</ScrollView> : <View style={styles.calendarGrid}>{['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=><Text key={d} style={[styles.weekday,{color:colors.mutedForeground}]}>{d}</Text>)}
             {Array.from({length:new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),1).getDay()},(_,i)=><View key={`empty-${i}`} style={styles.calendarDay}/>)}
             {Array.from({length:new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,0).getDate()},(_,i)=>{const day=i+1; return <Pressable key={day} style={[styles.calendarDay,styles.dayChoice,{backgroundColor:profile.birthDate===`${String(day).padStart(2,'0')}/${String(calendarMonth.getMonth()+1).padStart(2,'0')}/${calendarMonth.getFullYear()+543}`?colors.primary:'transparent'}]} onPress={()=>{update('birthDate',`${String(day).padStart(2,'0')}/${String(calendarMonth.getMonth()+1).padStart(2,'0')}/${calendarMonth.getFullYear()+543}`);setCalendarOpen(false);}}><Text style={{color:colors.foreground}}>{day}</Text></Pressable>})}
-          </View>
+          </View>}
           <SecondaryButton title="ปิด" onPress={() => setCalendarOpen(false)} />
         </View></View>
       </Modal>
@@ -187,9 +180,8 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
           BMI: {bmi === null ? 'กรอกน้ำหนักและส่วนสูงเพื่อคำนวณ' : bmi.toFixed(1)}
         </Text>
       </View>
-      <Text style={[styles.helpText,{color:colors.mutedForeground}]}>BMI ผู้ใหญ่คำนวณจากน้ำหนักและส่วนสูงด้วยสูตรเดียวกันทุกเพศ การแปลผลอาจต้องพิจารณาอายุและบริบทสุขภาพร่วมด้วย</Text>
-      <LabeledField label="โรคประจำตัว" value={profile.conditions} onChangeText={(value) => update('conditions', value)} placeholder="หากไม่มี กรุณากรอก “ไม่มี”" multiline />
-      <LabeledField label="ประวัติแพ้ยา *" value={profile.drugAllergies} onChangeText={(value) => update('drugAllergies', value)} placeholder="ชื่อยา/อาการ หรือกรอก “ไม่มี”" multiline />
+      <LabeledField label="โรคประจำตัว" value={profile.conditions} onChangeText={(value) => update('conditions', value)} placeholder="หากไม่มี กรุณากรอก “ไม่มี”" multiline minHeight={88} />
+      <LabeledField label="ประวัติแพ้ยา *" value={profile.drugAllergies} onChangeText={(value) => update('drugAllergies', value)} placeholder="ชื่อยาและอาการแพ้ หรือกรอก “ไม่มี”" multiline minHeight={112} />
       <LabeledField label="ประวัติแพ้อาหาร" value={profile.foodAllergies} onChangeText={(value) => update('foodAllergies', value)} placeholder="ชนิดอาหาร/อาการ หรือกรอก “ไม่มี”" multiline />
       <LabeledField label="ยาที่ใช้ประจำ" value={profile.medications} onChangeText={(value) => update('medications', value)} placeholder="ชื่อยา/ขนาดยา หรือกรอก “ไม่มี”" multiline />
 
@@ -231,6 +223,7 @@ function LabeledField({
   keyboardType,
   multiline = false,
   maxLength,
+  minHeight,
 }: {
   label: string;
   value: string;
@@ -239,6 +232,7 @@ function LabeledField({
   keyboardType?: KeyboardTypeOptions;
   multiline?: boolean;
   maxLength?: number;
+  minHeight?: number;
 }) {
   const colors = useColors();
   return (
@@ -256,6 +250,7 @@ function LabeledField({
         style={[
           styles.input,
           multiline ? styles.multilineInput : null,
+          minHeight ? { minHeight } : null,
           { color: colors.foreground, borderColor: colors.input, backgroundColor: colors.background },
         ]}
       />
@@ -337,7 +332,6 @@ const styles = StyleSheet.create({
   formActions: { flexDirection: 'row', gap: 8 },
   actionButton: { flex: 1 },
   requiredNote: { fontSize: 9, lineHeight: 14, textAlign: 'center' },
-  cardScanButton:{minHeight:43,borderRadius:12,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8},
   helpText:{fontSize:10,lineHeight:15},
   modalBackdrop:{flex:1,backgroundColor:'rgba(0,0,0,0.45)',alignItems:'center',justifyContent:'center',padding:20},
   calendar:{width:'100%',maxWidth:360,borderRadius:20,padding:16,gap:12},
@@ -347,6 +341,7 @@ const styles = StyleSheet.create({
   weekday:{width:'14.285%',height:34,textAlign:'center',textAlignVertical:'center',fontSize:11,fontWeight:'700'},
   calendarDay:{width:'14.285%',height:39,alignItems:'center',justifyContent:'center'},
   dayChoice:{borderRadius:13},
-  cardScanPreview:{minHeight:80,borderWidth:1,borderStyle:'dashed',borderRadius:14,padding:12,flexDirection:'row',alignItems:'center',gap:10},
-  scanTitle:{fontSize:12,fontWeight:'800',marginBottom:3},
+  yearScroll:{maxHeight:270},
+  yearGrid:{flexDirection:'row',flexWrap:'wrap',gap:7,justifyContent:'center'},
+  yearChoice:{width:'22%',height:38,borderRadius:11,alignItems:'center',justifyContent:'center'},
 });

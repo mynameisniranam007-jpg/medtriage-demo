@@ -117,7 +117,7 @@ export default function ResultsScreen() {
         icon="map-pin"
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          router.push('/(tabs)/hospitals');
+          router.push('/recommended-hospitals');
         }}
         testID="find-nearby-hospitals"
       />

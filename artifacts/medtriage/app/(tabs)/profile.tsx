@@ -9,7 +9,7 @@ import { useMedtriage } from '@/context/MedtriageContext';
 
 export default function ProfileScreen() {
   const colors = useColors();
-  const { appointment, appointmentLoading } = useMedtriage();
+  const { appointment, appointmentLoading, logout } = useMedtriage();
 
   return (
     <Screen contentStyle={styles.page}>
@@ -126,9 +126,9 @@ export default function ProfileScreen() {
       <BodyText style={styles.footerNote}>
         หากต้องการบริการสุขภาพจริง โปรดติดต่อสถานพยาบาลโดยตรง
       </BodyText>
-      <PrimaryButton title="ออกจากระบบ" icon="log-out" onPress={() => Alert.alert('ออกจากระบบ?', 'กลับไปหน้าเข้าสู่ระบบของ Medtriage', [
+      <PrimaryButton title="ออกจากระบบ" icon="log-out" onPress={() => Alert.alert('ออกจากระบบ?', 'ระบบจะลบข้อมูลส่วนตัวและนัดหมายตัวอย่างที่บันทึกไว้ในอุปกรณ์นี้', [
         { text: 'ยกเลิก', style: 'cancel' },
-        { text: 'ออกจากระบบ', style: 'destructive', onPress: () => router.replace('/') },
+        { text: 'ออกจากระบบและลบข้อมูล', style: 'destructive', onPress: () => { void logout().then(() => router.replace('/')).catch(() => Alert.alert('ลบข้อมูลไม่สำเร็จ','กรุณาลองออกจากระบบอีกครั้ง')); } },
       ])} testID="logout-button" />
     </Screen>
   );

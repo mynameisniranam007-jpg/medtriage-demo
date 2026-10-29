@@ -27,10 +27,12 @@ type MedtriageContextValue = {
   saveAppointment: (value: Appointment) => Promise<void>;
   updateAppointmentRating: (rating: number) => Promise<void>;
   cancelAppointment: () => Promise<number>;
+  logout: () => Promise<void>;
 };
 
 const STORAGE_KEY = 'medtriage:demo-appointment';
 const CANCEL_KEY = 'medtriage:demo-cancellations';
+const PROFILE_KEY = 'medtriage:patient-profile';
 const MedtriageContext = createContext<MedtriageContextValue | null>(null);
 
 export function MedtriageProvider({ children }: { children: ReactNode }) {
@@ -98,6 +100,16 @@ export function MedtriageProvider({ children }: { children: ReactNode }) {
     return 1 - count;
   }, []);
 
+  const logout = useCallback(async () => {
+    await AsyncStorage.multiRemove([PROFILE_KEY, STORAGE_KEY, CANCEL_KEY]);
+    setSymptoms('');
+    setBodyParts([]);
+    setPhotoUri(null);
+    setSelectedHospital(null);
+    setLocation(null);
+    setAppointment(null);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       symptoms,
@@ -115,6 +127,7 @@ export function MedtriageProvider({ children }: { children: ReactNode }) {
       saveAppointment,
       updateAppointmentRating,
       cancelAppointment,
+      logout,
     }),
     [
       symptoms,
@@ -128,6 +141,7 @@ export function MedtriageProvider({ children }: { children: ReactNode }) {
       saveAppointment,
       updateAppointmentRating,
       cancelAppointment,
+      logout,
     ],
   );
 

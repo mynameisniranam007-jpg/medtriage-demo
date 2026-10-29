@@ -2,14 +2,14 @@ import React from 'react';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Screen, PrimaryButton, SecondaryButton } from '@/components/UI';
 import { useColors } from '@/hooks/useColors';
 
 export default function WelcomeScreen() {
   const colors = useColors();
   return (
-    <Screen contentStyle={styles.page}>
+    <Screen scroll={false} contentStyle={styles.page}>
       <View style={styles.brandRow}>
         <View style={[styles.brandMark, { backgroundColor: colors.primary }]}><Feather name="plus" size={25} color={colors.primaryForeground} /></View>
         <Text style={[styles.brandName, { color: colors.foreground }]}>medtriage</Text>
@@ -26,23 +26,23 @@ export default function WelcomeScreen() {
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>เลือกเข้าสู่ระบบหรือสร้างบัญชีใหม่</Text>
       </View>
       <PrimaryButton title="เข้าสู่ระบบ" icon="log-in" onPress={() => router.push('/login')} testID="open-login" />
-      <SecondaryButton title="สมัครสมาชิก" icon="user-plus" onPress={() => router.push('/profile-setup')} testID="open-register" />
+      <SecondaryButton title="สมัครสมาชิก" icon="user-plus" onPress={() => router.push('/register')} testID="open-register" />
       <View style={[styles.notice, { backgroundColor: colors.secondary }]}>
         <Feather name="shield" size={16} color={colors.secondaryForeground} />
         <Text style={[styles.noticeText, { color: colors.secondaryForeground }]}>ต้นแบบนี้ยังไม่เชื่อมระบบหมอพร้อมหรือยืนยันตัวตนจริง โปรดใช้ข้อมูลสมมติ</Text>
       </View>
-      <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><Text style={[styles.help, { color: colors.secondaryForeground }]}>ดูแลข้อมูลสุขภาพของคุณอย่างปลอดภัย</Text></Pressable>
+      <Text style={[styles.help, { color: colors.secondaryForeground }]}>ดูแลข้อมูลสุขภาพของคุณอย่างปลอดภัย</Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { gap: 20, justifyContent: 'center' },
+  page: { gap: 14, justifyContent: 'center' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   brandMark: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   brandName: { fontSize: 20, fontWeight: '800', flex: 1 },
   demoTag: { backgroundColor: 'rgba(23,107,104,0.12)', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 20, fontSize: 10, fontWeight: '800' },
-  hero: { minHeight: 275, padding: 24, borderRadius: 28, justifyContent: 'flex-end', gap: 11, overflow: 'hidden' },
+  hero: { minHeight: 235, padding: 22, borderRadius: 28, justifyContent: 'flex-end', gap: 10, overflow: 'hidden' },
   heroIcon: { width: 50, height: 50, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   heroEyebrow: { color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '700' },
   heroTitle: { color: '#FFFFFF', fontSize: 31, lineHeight: 40, fontWeight: '800' },

@@ -30,8 +30,8 @@ export function Screen({
 }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const paddingTop = Platform.OS === 'web' ? 67 : insets.top + 12;
-  const paddingBottom = Platform.OS === 'web' ? 112 : insets.bottom + 86;
+  const paddingTop = Platform.OS === 'web' ? 16 : insets.top + 4;
+  const paddingBottom = !scroll ? (Platform.OS === 'web' ? 16 : insets.bottom + 12) : Platform.OS === 'web' ? 112 : insets.bottom + 86;
   const containerStyle = [
     styles.pageContent,
     { paddingTop, paddingBottom },
@@ -290,6 +290,7 @@ const styles = StyleSheet.create({
   pageContent: {
     paddingHorizontal: 20,
     gap: 18,
+    flexGrow: 1,
     maxWidth: 680,
     width: '100%',
     alignSelf: 'center',

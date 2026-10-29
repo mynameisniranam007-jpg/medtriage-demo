@@ -1,7 +1,7 @@
 import React from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Eyebrow, Screen } from '@/components/UI';
 import PatientProfileSection from '@/components/PatientProfileSection';
 import { useColors } from '@/hooks/useColors';
@@ -20,13 +20,8 @@ export default function ProfileSetupScreen() {
       <Eyebrow>ตั้งค่าครั้งแรก</Eyebrow>
       <Text style={[styles.title, { color: colors.foreground }]}>กรอกข้อมูลพื้นฐานก่อนเริ่มใช้งาน</Text>
       <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-        กรอกข้อมูลหรือถ่ายภาพบัตรในต้นแบบ ข้อมูลยังไม่ถูกส่งไปตรวจสอบตัวตน
+        กรอกข้อมูลสำหรับบัญชีตัวอย่างนี้ ระบบยังไม่ยืนยันตัวตนจริง
       </Text>
-      <Pressable accessibilityRole="button" onPress={() => Alert.alert('หมอพร้อมยังไม่เชื่อมต่อ', 'การยืนยันผ่านหมอพร้อมต้องใช้การเชื่อมต่อและรับรองจากระบบทางการ เวอร์ชันนี้แสดงเฉพาะหน้าต้นแบบ คุณสามารถทดลองกรอกข้อมูลสมมติด้านล่างได้')} style={({pressed})=>[styles.morPromButton,{backgroundColor:colors.secondary,opacity:pressed?0.75:1}]}>
-        <Feather name="heart" size={18} color={colors.secondaryForeground}/>
-        <View style={{flex:1}}><Text style={[styles.morPromTitle,{color:colors.secondaryForeground}]}>สมัครผ่านหมอพร้อม</Text><Text style={[styles.morPromSub,{color:colors.secondaryForeground}]}>เชื่อมต่อไม่ได้ในต้นแบบนี้</Text></View>
-        <Feather name="chevron-right" size={17} color={colors.secondaryForeground}/>
-      </Pressable>
       <PatientProfileSection
         mode="setup"
         initialNationalId={nationalId}
@@ -43,7 +38,4 @@ const styles = StyleSheet.create({
   brandName: { fontSize: 18, fontWeight: '800' },
   title: { fontSize: 21, lineHeight: 29, fontWeight: '800' },
   subtitle: { fontSize: 12, lineHeight: 18, marginBottom: 2 },
-  morPromButton:{minHeight:58,borderRadius:15,paddingHorizontal:13,flexDirection:'row',alignItems:'center',gap:10},
-  morPromTitle:{fontSize:13,fontWeight:'800'},
-  morPromSub:{fontSize:10,marginTop:3},
 });
