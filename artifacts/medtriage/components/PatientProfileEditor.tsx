@@ -114,8 +114,8 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
       <SectionTitle title="ข้อมูลทั่วไป" />
       <ChoiceGroup label="คำนำหน้า *" options={['นาย', 'นาง', 'นางสาว']} value={profile.title} onChange={(value) => update('title', value)} />
       <View style={styles.measurementRow}>
-        <LabeledField label="ชื่อ *" value={profile.firstName || profile.fullName.split(' ')[0]} onChangeText={(value) => update('firstName', value)} placeholder="ชื่อ" />
-        <LabeledField label="นามสกุล *" value={profile.lastName} onChangeText={(value) => update('lastName', value)} placeholder="นามสกุล" />
+        <LabeledField half label="ชื่อ *" value={profile.firstName || profile.fullName.split(' ')[0]} onChangeText={(value) => update('firstName', value)} placeholder="ชื่อ" />
+        <LabeledField half label="นามสกุล *" value={profile.lastName} onChangeText={(value) => update('lastName', value)} placeholder="นามสกุล" />
       </View>
       <LabeledField
         label="เลขบัตรประชาชน *"
@@ -172,8 +172,8 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
       />
       {profile.bloodGroup === 'ไม่ทราบ' || profile.rhFactor === 'ไม่ทราบ' ? <Text style={[styles.helpText,{color:colors.secondaryForeground}]}>หากไม่ทราบกรุ๊ปเลือดหรือ Rh factor แนะนำตรวจเลือดที่สถานพยาบาลก่อนบันทึกข้อมูล</Text> : null}
       <View style={styles.measurementRow}>
-        <LabeledField label="น้ำหนัก (กก.)" value={profile.weightKg} onChangeText={(value) => update('weightKg', value)} placeholder="เช่น 60" keyboardType="decimal-pad" />
-        <LabeledField label="ส่วนสูง (ซม.)" value={profile.heightCm} onChangeText={(value) => update('heightCm', value)} placeholder="เช่น 165" keyboardType="decimal-pad" />
+        <LabeledField half label="น้ำหนัก (กก.)" value={profile.weightKg} onChangeText={(value) => update('weightKg', value)} placeholder="เช่น 60" keyboardType="decimal-pad" />
+        <LabeledField half label="ส่วนสูง (ซม.)" value={profile.heightCm} onChangeText={(value) => update('heightCm', value)} placeholder="เช่น 165" keyboardType="decimal-pad" />
       </View>
       <View style={[styles.bmiBox, { backgroundColor: colors.background }]}>
         <Feather name="activity" size={15} color={colors.secondaryForeground} />
@@ -217,6 +217,7 @@ export default function PatientProfileEditor({ initialProfile, setup, onSaved, o
 }
 
 function LabeledField({
+  half = false,
   label,
   value,
   onChangeText,
@@ -226,6 +227,7 @@ function LabeledField({
   maxLength,
   minHeight,
 }: {
+  half?: boolean;
   label: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -237,7 +239,7 @@ function LabeledField({
 }) {
   const colors = useColors();
   return (
-    <View style={styles.field}>
+    <View style={[styles.field, half ? styles.fieldHalf : null]}>
       <Text style={[styles.fieldLabel, { color: colors.foreground }]}>{label}</Text>
       <TextInput
         value={value}
@@ -310,7 +312,8 @@ const styles = StyleSheet.create({
   formSub: { fontSize: 10, lineHeight: 15 },
   privacyNotice: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10, borderRadius: 12 },
   privacyText: { flex: 1, fontSize: 10, lineHeight: 16, fontWeight: '600' },
-  field: { flex: 1, gap: 6 },
+  field: { gap: 8, flexShrink: 0 },
+  fieldHalf: { flex: 1, minWidth: 0 },
   fieldLabel: { fontSize: 13, fontWeight: '700' },
   input: { minHeight: 48, borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15 },
   multilineInput: { minHeight: 68 },
